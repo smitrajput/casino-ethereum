@@ -1,4 +1,4 @@
-pragma solidity 0.4.20;
+pragma solidity ^0.4.20;
 
 
 contract Casino {
@@ -18,7 +18,7 @@ contract Casino {
 
     function() public payable {}
 
-    function Casino(unit _minimumBet) public {
+    constructor(uint _minimumBet) public {
         owner = msg.sender;
         if (_minimumBet != 0) minimumBet = _minimumBet;
     }
@@ -34,7 +34,7 @@ contract Casino {
         return false;
     }
 
-    function bet(uint numberSelected) public {
+    function bet(uint numberSelected) public payable {
         require(!checkPlayerExists(msg.sender));
         require(numberSelected >= 1 && numberSelected <= 10);
         require(msg.value >= minimumBet);
@@ -53,6 +53,12 @@ contract Casino {
         distributePrizes(numberGenerated);
     }
 
+    function resetData() public {
+       players.length = 0; // Delete all the players array
+       totalBet = 0;
+       numberOfBets = 0;
+    }
+
     function distributePrizes(uint numberWinner) public {
         address[100] memory winners;
         uint count = 0;
@@ -64,10 +70,10 @@ contract Casino {
             delete playerInfo[players[i]];
         }
         players.length = 0;
-        uint winnerEtherAmount = totalBets/winners.length;
-        for (uint i=0; i < count; i++){
-            if (winners[i] != address(0))
-                winners[i].transfer(winnerEtherAmount);
+        uint winnerEtherAmount = totalBet/winners.length;
+        for (uint j=0; j < count; j++){
+            if (winners[j] != address(0))
+                winners[j].transfer(winnerEtherAmount);
         }
     }
 }
